@@ -1,12 +1,16 @@
 from mongoengine import connect, MultipleObjectsReturned
 
-from models import Author, Quote
+from models import Author, Quote, Contact
+from faker import Faker
 import json
+import random
 
 connect(
     db="mein",
     host="mongodb+srv://remmover:******@cluster0.uhuxtdj.mongodb.net/?retryWrites=true&w=majority"
 )
+
+fake = Faker()
 
 
 def load_data_from_json(json_file):
@@ -46,6 +50,22 @@ def save_quotes_to_database(quotes):
         print(f"Error loading quotes data: {str(e)}")
 
 
+def save_contacts_to_database():
+    Contact.objects().delete()
+    try:
+        for _ in range(30):
+            Contact(
+                fullname=fake.name(),
+                email=fake.email(),
+                phone=fake.phone_number(),
+                preferred_contact_method=random.choice(["email", "sms"]),
+                logic_=False,
+            ).save()
+        print("Contacts data loaded successfully.")
+    except Exception as e:
+        print(f"Error loading quotes data: {str(e)}")
+
+
 if __name__ == "__main__":
     authors_json_file = "data/authors.json"
     quotes_json_file = "data/quotes.json"
@@ -55,3 +75,4 @@ if __name__ == "__main__":
 
     save_authors_to_database(authors_data)
     save_quotes_to_database(quotes_data)
+    save_contacts_to_database()
